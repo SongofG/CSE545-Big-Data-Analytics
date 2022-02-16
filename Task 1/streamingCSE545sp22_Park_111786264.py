@@ -4,8 +4,8 @@
 ## Template code for assignment 1 part 1. 
 ## Do not edit anywhere except blocks where a #[TODO]# appears
 ##
-## Student Name:
-## Student ID: 
+## Student Name: Haein Park
+## Student ID: 111786264
 
 
 import sys
