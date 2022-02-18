@@ -28,12 +28,98 @@ MEMORY_SIZE = 100 #do not edit
 
 memory1a =  deque([None] * MEMORY_SIZE, maxlen=MEMORY_SIZE) #do not edit
 
+# Calculating the mean values
+def mean(l, start, end):
+    sum = 0
+    for i in range(start, end):
+        sum += l[i]
+    return sum//(end - start)
+
+def median(l):
+    return l[len(l)//2]
+
+def trailZeros(bit):
+    c = 0
+    while(bit[-(c+1) == "0"]):
+        c += 1
+    return c
+
 def task1ADistinctValues(element, returnResult = True):
     #[TODO]#
     #procss the element you may only use memory1a, storing at most 100 
     
+    ##### Each group of hash functions consists of 3 hash functions
+    ##### Here, we assume the true number of distinct elements in our stream is 2^64.
+    ##### For all of my hash functions, they will have the form of (a*x + b) % 64
+    ##### where a and b are odd numbers.
+    ##### bin()[2:] is to get rid of the prefix "0b"
+
+    # Group 1: b = a + 2
+    a = 1
+    b = a + 2
+    for i in range(20):
+        if memory1a[i] == None:
+            memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
+        else:
+            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+        a = b
+        b += 2
+
+    # Group 2: b = a + 4
+    a = 1
+    b = a + 4
+    for i in range(20, 40):
+        if memory1a[i] == None:
+            memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
+        else:
+            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+        a = b
+        b += 4
+
+    # Group 3: b = a + 6
+    a = 3
+    b = a + 6
+    for i in range(40, 60):
+        if memory1a[i] == None:
+            memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
+        else:
+            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+        a = b
+        b += 6
+
+    # Group 4: b = a + 8
+    a = 5
+    b = a + 8
+    for i in range(60:80):
+        if memory1a[i] == None:
+            memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
+        else:
+            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+        a = b
+        b += 8
+
+    # Group 5: b = a + 10
+    a = 1
+    b = a + 10
+    for i in range(80:100):
+        if memory1a[i] == None:
+            memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
+        else:
+            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+        a = b
+        b += 10
+
+
     if returnResult: #when the stream is requesting the current result
-        result = 0
+        mean1 = mean(memory1a, 0, 20)
+        mean2 = mean(memory1a, 20, 40)
+        mean3 = mean(memory1a, 40, 60)
+        mean4 = mean(memory1a, 60, 80)
+        mean5 = mean(memory1a, 80, 100)
+        
+        median = median([mean1, mean2, mean3, mean4, mean5])
+        
+        result = median
         #[TODO]#
         #any additional processing to return the result at this point
         return result
