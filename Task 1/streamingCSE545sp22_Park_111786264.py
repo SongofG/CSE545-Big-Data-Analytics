@@ -14,6 +14,7 @@ from random import random
 from collections import deque
 from sys import getsizeof
 import resource
+import pdb
 
 ##########################################################################
 ##########################################################################
@@ -33,14 +34,15 @@ def mean(l, start, end):
     sum = 0
     for i in range(start, end):
         sum += l[i]
-    return sum//(end - start)
+    return sum/(end - start)
 
 def median(l):
+    l.sort()
     return l[len(l)//2]
 
 def trailZeros(bit):
     c = 0
-    while(bit[-(c+1) == "0"]):
+    while(c < len(bit) and bit[-(c+1)] == "0"):
         c += 1
     return c
 
@@ -61,7 +63,7 @@ def task1ADistinctValues(element, returnResult = True):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
-            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+            memory1a.append(max(memory1a[i], (lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:]))(element)))
         a = b
         b += 2
 
@@ -72,7 +74,7 @@ def task1ADistinctValues(element, returnResult = True):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
-            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+            memory1a.append(max(memory1a[i], (lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:]))(element)))
         a = b
         b += 4
 
@@ -83,29 +85,29 @@ def task1ADistinctValues(element, returnResult = True):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
-            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+            memory1a.append(max(memory1a[i], (lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:]))(element)))
         a = b
         b += 6
 
     # Group 4: b = a + 8
     a = 5
     b = a + 8
-    for i in range(60:80):
+    for i in range(60, 80):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
-            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+            memory1a.append(max(memory1a[i], (lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:]))(element)))
         a = b
         b += 8
 
     # Group 5: b = a + 10
     a = 1
     b = a + 10
-    for i in range(80:100):
+    for i in range(80, 100):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
-            memory1a.append(max((memory1a[i], lambda e: 2 ** trailZeros(bin((a*e + b)%64))[2:])(element)))
+            memory1a.append(max(memory1a[i], (lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:]))(element)))
         a = b
         b += 10
 
@@ -117,9 +119,9 @@ def task1ADistinctValues(element, returnResult = True):
         mean4 = mean(memory1a, 60, 80)
         mean5 = mean(memory1a, 80, 100)
         
-        median = median([mean1, mean2, mean3, mean4, mean5])
+        Median = median([mean1, mean2, mean3, mean4, mean5])
         
-        result = median
+        result = Median
         #[TODO]#
         #any additional processing to return the result at this point
         return result
@@ -184,7 +186,7 @@ if __name__ == "__main__": #[Uncomment peices to test]
             #remove \n and convert to int
             element = int(line.strip())
             i += 1
-            
+
             #call tasks         
             if i in printLines: #print status at this point: 
                 result1a = task1ADistinctValues(element, returnResult=True)
@@ -197,7 +199,7 @@ if __name__ == "__main__": #[Uncomment peices to test]
                 print("   1C: Most frequent value: %d" % int(result1c))
                 print(" [current memory sizes: A: %d, B: %d, C: %d]\n" % \
                     (getMemorySize(memory1a), getMemorySize(memory1b), getMemorySize(memory1c)))
-                
+                  
             else: #just pass for stream processing
                 result1a = task1ADistinctValues(element, False)
                 result1b = task1BMedian(element, False)
