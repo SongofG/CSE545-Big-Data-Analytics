@@ -18,8 +18,8 @@
 ## Original Code written by H. Andrew Schwartz
 ## for SBU's Big Data Analytics Course 
 ##
-## Student Name:
-## Student ID: 
+## Student Name: Haein Park
+## Student ID: 111786264
 
 
 import sys
