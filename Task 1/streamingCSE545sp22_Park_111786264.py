@@ -14,7 +14,7 @@ from random import random
 from collections import deque
 from sys import getsizeof
 import resource
-import pdb
+import math
 
 ##########################################################################
 ##########################################################################
@@ -135,8 +135,18 @@ def task1BMedian(element, returnResult = True):
     #[TODO]#
     #procss the element
     
+    # Index 0: counter
+    # Index 1: summation of the natural logged values
+
+    if memory1b[0] == None and memory1b[1] == None:
+        memory1b[0] = 1
+        memory1b[1] = math.log(element)
+    else:
+        memory1b[0] += 1
+        memory1b[1] += math.log(element)
+    
     if returnResult: #when the stream is requesting the current result
-        result = 0
+        result = 1/(0.5**(1/(memory1b[0]/memory1b[1])))
         #[TODO]#
         #any additional processing to return the result at this point
         return result
