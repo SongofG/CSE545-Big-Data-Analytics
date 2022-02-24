@@ -41,10 +41,9 @@ def median(l):
     return l[len(l)//2]
 
 def trailZeros(bit):
-    c = 0
-    while(c < len(bit) and bit[-(c+1)] == "0"):
-        c += 1
-    return c
+    if bit.rfind("1") + 1 == len(bit):
+        return 0
+    return len(bit) - bit.rfind("1") - 1
 
 def task1ADistinctValues(element, returnResult = True):
     #[TODO]#
@@ -160,8 +159,19 @@ def task1CMostFreqValue(element, returnResult = True):
     #[TODO]#
     #procss the element
     
+    if memory1c[0] == None and memory1c[1] == None:
+        memory1c[0] = 1
+        memory1c[1] = math.log(element)
+    else:
+        memory1c[0] += 1
+        memory1c[1] += math.log(element)
+    
     if returnResult: #when the stream is requesting the current result
-        result = 0
+        alpha_hat = memory1c[0]/memory1c[1]
+        _95th_percentile = 1/(0.05**(1/alpha_hat))
+        median_hat = 2 ** (1/alpha_hat)
+        print(_95th_percentile)
+        result = (1 + median_hat + _95th_percentile)//3
         #[TODO]#
         #any additional processing to return the result at this point
         return result
