@@ -110,7 +110,7 @@ class MyMRSimulator:
         #[SEGMENT 1]
         #the following two lists are shared by all processes
         #in order to simulate the communication
-        namenode_m2r = Manager().list() #stores the reducer task assignment and 
+        namenode_m2r = Manager().list()   #stores the reducer task assignment and 
                                           #each key-value pair returned from mappers
                                           #in the form: [(reduce_task_num, (k, v)), ...]
                                           #[COMBINER: when enabled this might hold]
@@ -121,10 +121,22 @@ class MyMRSimulator:
         #divide up the data into chunks accord to num_map_tasks, launch a new process
         #for each map task, passing the chunk of data to it. 
         #the following starts a process
-        #      p = Process(target=self.mapTask, args=(chunk,namenode_m2r))
-        #      p.start()  
+        # p = Process(target=self.mapTask, args=(chunk,namenode_m2r))
+        # p.start()  
         processes = []
         chunkSize = int(np.ceil(len(self.data) / int(self.num_map_tasks)))
+        chunk = self.data.copy()
+        while len(chunk)//chunkSize >= 1:  # Use the len of the data to slice the data into chunks
+            p = Process(target.mapTask, args=(chunk[:chunkSize], namenode_m2r)
+            p.start()
+            processes.append(p)
+            chunk = chunk[chunkSize:]  # Slicing the list
+        if len(chunk) != 0:
+            p = Process(target.mapTask, args=(chunk, namenode_m2r)
+            p.start()
+            processes.append(p)
+        
+            
         #[TODO: DONE]#
  
 
