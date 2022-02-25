@@ -96,13 +96,19 @@ class MyMRSimulator:
         #SEGMENT 1. Sort such that all values for a given key are in a 
         #           list for that key 
         #[TODO]#
+        k_vlist = dict()
+        for (reducer_num, (k, v)) in kvs:
+            try:
+                k_vlist[k].append(v)
+            except KeyError:
+                k_vlist[k] = [v]
         
         #SEGMENT 2. call self.reduce(k, vs) for each each key, providing 
         #           its list of values and append the results (if they exist) 
         #           to the list variable "namenode_fromR" 
         #[TODO]#
-        
-        pass
+        for k, v in k_vlist.items():
+            namenode_fromR.append(self.reduce(k, v))
 
     def runSystem(self): 
         #runs the full map-reduce system processes on mrObject
@@ -127,14 +133,13 @@ class MyMRSimulator:
         chunkSize = int(np.ceil(len(self.data) / int(self.num_map_tasks)))
         chunk = self.data.copy()
         while len(chunk)//chunkSize >= 1:  # Use the len of the data to slice the data into chunks
-            p = Process(target.mapTask, args=(chunk[:chunkSize], namenode_m2r)
-            p.start()
-            processes.append(p)
+            processes.append(Process(target=self.mapTask, args=(chunk[:chunkSize], namenode_m2r)))
+            processes[-1].start()
             chunk = chunk[chunkSize:]  # Slicing the list
         if len(chunk) != 0:
-            p = Process(target.mapTask, args=(chunk, namenode_m2r)
-            p.start()
-            processes.append(p)
+            processes.append(Process(target=self.mapTask, args=(chunk, namenode_m2r)))
+            processes[-1].start()
+
         
             
         #[TODO: DONE]#
@@ -145,16 +150,22 @@ class MyMRSimulator:
         for p in processes:
             p.join()
 		        #print output from map tasks 
-        print("namenode_m2r after map tasks complete:")
-        pprint(sorted(list(namenode_m2r)))
+        print("\n\nnamenode_m2r after map tasks complete:")
+        pprint(sorted(list(namenode_m2r)))  # This should be uncommented
 
         ##[SEGMENT 4]
         #"send" each key-value pair to its assigned reducer by placing each 
         #into a list of lists, where to_reduce_task[task_num] = [list of kv pairs]
         to_reduce_task = [[] for i in range(self.num_reduce_tasks)] 
         #[TODO]#
-
         
+        
+        start = 0
+        for k in dict(sorted(list(namenode_m2r))).keys():
+            val = dict(sorted(list(namenode_m2r)))[k]
+            end = sorted(list(namenode_m2r)).index((k, val)) + 1
+            to_reduce_task[k] = sorted(list(namenode_m2r))[start:end]
+            start = end
 
         #[SEGMENT 5]
         #launch the reduce tasks as a new process for each. 
@@ -168,7 +179,7 @@ class MyMRSimulator:
         for p in processes:
             p.join()
         #print output from reducer tasks 
-        print("namenode_fromR after reduce tasks complete:")
+        print("\n\nnamenode_fromR after reduce tasks complete:")
         pprint(sorted(list(namenode_fromR)))
 
         #return all key-value pairs:
@@ -253,6 +264,7 @@ def createSparseMatrix(X, label):
 
 if __name__ == "__main__": #[Uncomment peices to test]
     
+    __spec__ = None  # For preventing debugging error
     print("\n\nTESTING YOUR CODE\n")
     
     ###################
