@@ -245,11 +245,12 @@ class CountBy10PowersMR(MyMRSimulator):
 
     def map(self, k, v): 
         #[TODO]#
-        return []
+        k = 10 ** (len(str(k)) - 1)
+        return [(k, v)]
     
     def reduce(self, k, vs): 
         #[TODO]#
-        return []
+        return (k, np.sum(vs))
 			
 ##########################################################################
 ##########################################################################
