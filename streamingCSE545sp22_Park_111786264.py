@@ -15,6 +15,7 @@ from collections import deque
 from sys import getsizeof
 import resource
 import math
+import time  # For execution time measuring
 
 ##########################################################################
 ##########################################################################
@@ -30,15 +31,21 @@ MEMORY_SIZE = 100 #do not edit
 memory1a =  deque([None] * MEMORY_SIZE, maxlen=MEMORY_SIZE) #do not edit
 
 # Calculating the mean values
-def mean(l, start, end):
-    sum = 0
-    for i in range(start, end):
-        sum += l[i]
-    return sum/(end - start)
+def mean(l):
+    sums = []
+    Sum = 0
+    # Hard coded the number of iterations
+    # since we know the number of hash functions
+    for i in range(50):
+        Sum += l[i]
+        if (i+1)%5 == 0:
+            sums.append(Sum/5)
+            Sum = 0
+    return sums
 
 def median(l):
     l.sort()
-    return l[len(l)//2]
+    return (l[len(l)//2] + l[(len(l)//2)-1])/2
 
 def trailZeros(bit):
     if bit.rfind("1") + 1 == len(bit):
@@ -58,7 +65,7 @@ def task1ADistinctValues(element, returnResult = True):
     # Group 1: b = a + 2
     a = 1
     b = a + 2
-    for i in range(20):
+    for i in range(10):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
@@ -69,7 +76,7 @@ def task1ADistinctValues(element, returnResult = True):
     # Group 2: b = a + 4
     a = 1
     b = a + 4
-    for i in range(20, 40):
+    for i in range(10, 20):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
@@ -80,7 +87,7 @@ def task1ADistinctValues(element, returnResult = True):
     # Group 3: b = a + 6
     a = 3
     b = a + 6
-    for i in range(40, 60):
+    for i in range(20, 30):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
@@ -91,7 +98,7 @@ def task1ADistinctValues(element, returnResult = True):
     # Group 4: b = a + 8
     a = 5
     b = a + 8
-    for i in range(60, 80):
+    for i in range(30, 40):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
@@ -102,7 +109,7 @@ def task1ADistinctValues(element, returnResult = True):
     # Group 5: b = a + 10
     a = 1
     b = a + 10
-    for i in range(80, 100):
+    for i in range(40, 50):
         if memory1a[i] == None:
             memory1a.append((lambda e: 2 ** trailZeros(bin((a*e + b)%64)[2:])) (element))
         else:
@@ -112,13 +119,8 @@ def task1ADistinctValues(element, returnResult = True):
 
 
     if returnResult: #when the stream is requesting the current result
-        mean1 = mean(memory1a, 0, 20)
-        mean2 = mean(memory1a, 20, 40)
-        mean3 = mean(memory1a, 40, 60)
-        mean4 = mean(memory1a, 60, 80)
-        mean5 = mean(memory1a, 80, 100)
-        
-        Median = median([mean1, mean2, mean3, mean4, mean5])
+        Means = mean(memory1a)
+        Median = median(Means)
         
         result = Median
         #[TODO]#
@@ -159,21 +161,49 @@ def task1CMostFreqValue(element, returnResult = True):
     #[TODO]#
     #procss the element
     
-    if memory1c[0] == None and memory1c[1] == None:
-        memory1c[0] = 1
-        memory1c[1] = math.log(element)
-    else:
-        memory1c[0] += 1
-        memory1c[1] += math.log(element)
+    # Here we count the elements and get the sum of logged value
+    try:
+        # index 98: count
+        # index 99: summation of the log values
+        memory1c[98] += 1
+        memory1c[99] += math.log(element)
+    except TypeError:
+        memory1c[98] = 1
+        memory1c[99] = math.log(element)
+    
+    # Here we collect the numbers and count them.
+    if element < 99:
+        try:
+            memory1c[element - 1] += element
+        except TypeError:
+            memory1c[element - 1] = element
     
     if returnResult: #when the stream is requesting the current result
-        alpha_hat = memory1c[0]/memory1c[1]
-        _95th_percentile = 1/(0.05**(1/alpha_hat))
-        median_hat = 2 ** (1/alpha_hat)
-        print(_95th_percentile)
-        result = (1 + median_hat + _95th_percentile)//3
+        try:
+            print("\n95% Percentile of Pareto Type 1 Distribution is", round(1/(0.05**(1/(memory1c[98]/memory1c[99]))), 2), '\n')
+        except ZeroDivisionError:
+            print("memory1c[98]:" ,memory1c[98])
+            print("memory1c[99]:", memory1c[99])
+            print("memory1c[98]/memory1c[99]:", memory1c[98]/memory1c[99])
+            print("1/(memory1c[98]/memory1c[99]):", 1/(memory1c[98]/memory1c[99]))
+            print("0.05**(1/(memory1c[98]/memory1c[99])):", 0.05**(1/(memory1c[98]/memory1c[99])))
+            print("1/(0.05**(1/(memory1c[98]/memory1c[99]))):", 1/(0.05**(1/(memory1c[98]/memory1c[99]))))
+
         #[TODO]#
         #any additional processing to return the result at this point
+        maximum = 0
+        index = 0
+        for i in range(98):
+            try:
+                tmp = maximum
+                maximum = max(maximum, memory1c[i]//(i+1))
+                if tmp != maximum:
+                    index = i
+            except TypeError:
+                memory1c[i] = 0  # replacing None value to 0
+        
+        result = index + 1
+        
         return result
     else: #no need to return a result
         pass
@@ -189,7 +219,7 @@ def getMemorySize(l): #returns sum of all element sizes
     return sum([getsizeof(e) for e in l])+getsizeof(l)
 
 if __name__ == "__main__": #[Uncomment peices to test]
-    
+    start_time = time.time()
     print("\n\nTESTING YOUR CODE\n")
     
     ###################
@@ -210,23 +240,24 @@ if __name__ == "__main__": #[Uncomment peices to test]
             #call tasks         
             if i in printLines: #print status at this point: 
                 result1a = task1ADistinctValues(element, returnResult=True)
-                result1b = task1BMedian(element, returnResult=True)
-                result1c = task1CMostFreqValue(element, returnResult=True)
+               # result1b = task1BMedian(element, returnResult=True)
+               # result1c = task1CMostFreqValue(element, returnResult=True)
                 
                 print(" Result at stream element # %d:" % i)
                 print("   1A:     Distinct values: %d" % int(result1a))
-                print("   1B:              Median: %.2f" % float(result1b))
-                print("   1C: Most frequent value: %d" % int(result1c))
+               # print("   1B:              Median: %.2f" % float(result1b))
+               # print("   1C: Most frequent value: %d" % int(result1c))
                 print(" [current memory sizes: A: %d, B: %d, C: %d]\n" % \
                     (getMemorySize(memory1a), getMemorySize(memory1b), getMemorySize(memory1c)))
                   
             else: #just pass for stream processing
                 result1a = task1ADistinctValues(element, False)
-                result1b = task1BMedian(element, False)
-                result1c = task1CMostFreqValue(element, False)
+               # result1b = task1BMedian(element, False)
+               # result1c = task1CMostFreqValue(element, False)
                 
             memUsage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             if memUsage > peakMem: peakMem = memUsage
         
     print("\n*******************************\n       Stream Terminated \n*******************************")
     print("(peak memory usage was: ", peakMem, ")")
+    print("\n\n--- %.5f seconds ---" % (time.time() - start_time))
